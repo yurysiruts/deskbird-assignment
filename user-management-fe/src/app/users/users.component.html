@@ -1,0 +1,79 @@
+<div class="users-container">
+  <div class="header">
+    <h2>User Management</h2>
+    <div class="logged-in-user">
+      <p *ngIf="currentUser$ | async as user" class="current-user-info">
+        {{ user.name ? user.name : user.email }}
+      </p>
+      <button pButton type="button" label="Logout" icon="pi pi-sign-out" (click)="logout()" class="p-button-outlined"></button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading$ | async" class="loading">
+    <p>Loading users...</p>
+  </div>
+
+  <div *ngIf="error$ | async as error" class="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <ng-container *ngIf="(users$ | async) as users">
+    <p-table 
+      [value]="users"
+      [loading]="isLoading$ | async"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{'min-width': '50rem'}"
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [rowsPerPageOptions]="[10,25,50]">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th *ngIf="isAdmin$ | async">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.name ? user.name : 'N/A' }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="role-badge" [class.admin]="user.role === 'admin'">
+              {{ user.role }}
+            </span>
+          </td>
+          <td *ngIf="isAdmin$ | async">
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-pencil" 
+              class="p-button-rounded p-button-text p-button-sm"
+              (click)="editUser(user)"
+              pTooltip="Edit User"
+              [disabled]="!(isAdmin$ | async)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      
+    </p-table>
+  </ng-container>
+
+  <app-edit-user-dialog
+    [visible]="displayDialog"
+    [user]="selectedUser"
+    [roles]="roles"
+    (save)="onDialogSave($event)"
+    (cancel)="onDialogCancel()"
+    [disabled]="!(isAdmin$ | async)"
+  ></app-edit-user-dialog>
+</div>
+
+<p-toast></p-toast> 

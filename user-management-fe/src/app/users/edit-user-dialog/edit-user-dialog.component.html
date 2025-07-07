@@ -1,0 +1,46 @@
+<p-dialog 
+header="Edit User" 
+[(visible)]="visible" 
+[modal]="true" 
+[style]="{width: '450px'}"
+[draggable]="false" 
+[resizable]="false"
+(onHide)="onCancel()"
+>
+<form [formGroup]="editForm" (ngSubmit)="onSave()">
+  <div class="p-field">
+    <label for="name">Name</label>
+    <input id="name" type="text" pInputText formControlName="name" [disabled]="disabled" />
+    <div *ngIf="editForm.get('name')?.touched && editForm.get('name')?.invalid" class="error">
+      <span *ngIf="editForm.get('name')?.errors?.['required']">Name is required.</span>
+    </div>
+  </div>
+  <div class="p-field">
+    <label for="email">Email</label>
+    <input id="email" type="email" pInputText formControlName="email" [disabled]="disabled" />
+    <div *ngIf="editForm.get('email')?.touched && editForm.get('email')?.invalid" class="error">
+      <span *ngIf="editForm.get('email')?.errors?.['required']">Email is required.</span>
+      <span *ngIf="editForm.get('email')?.errors?.['email']">Invalid email format.</span>
+    </div>
+  </div>
+  <div class="p-field">
+    <label for="role">Role</label>
+    <p-dropdown 
+      id="role" 
+      formControlName="role" 
+      [options]="roles" 
+      optionLabel="label" 
+      optionValue="value"
+      placeholder="Select a role"
+      [disabled]="disabled">
+    </p-dropdown>
+    <div *ngIf="editForm.get('role')?.touched && editForm.get('role')?.invalid" class="error">
+      <span *ngIf="editForm.get('role')?.errors?.['required']">Role is required.</span>
+    </div>
+  </div>
+</form>
+<ng-template pTemplate="footer">
+  <button pButton type="button" label="Cancel" icon="pi pi-times" (click)="onCancel()" class="p-button-text" [disabled]="disabled"></button>
+  <button pButton type="button" label="Save" icon="pi pi-check" (click)="onSave()" [disabled]="editForm.invalid || disabled"></button>
+</ng-template>
+</p-dialog>

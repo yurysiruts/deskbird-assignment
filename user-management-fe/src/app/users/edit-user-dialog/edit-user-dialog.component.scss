@@ -1,0 +1,17 @@
+.p-field {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.p-field label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #e1e1e1;
+}
+
+.error {
+  color: #e53935;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+} 

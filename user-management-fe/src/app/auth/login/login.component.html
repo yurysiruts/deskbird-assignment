@@ -1,0 +1,27 @@
+<div class="login-container">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <h2>Login</h2>
+    <div class="p-field">
+      <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="error">
+        <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required.</span>
+        <span *ngIf="loginForm.get('email')?.errors?.['email']">Invalid email format.</span>
+      </div>
+      <p-iftalabel>
+        <input id="email" type="email" pInputText formControlName="email" placeholder="Enter your email" />
+        <label for="email">Email</label>
+      </p-iftalabel>
+    </div>
+    <div class="p-field">
+      <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="error">
+        <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</span>
+      </div>
+      <p-iftalabel>
+        <input id="password" type="password" pInputText formControlName="password" placeholder="Enter your password" />
+        <label for="password">Password</label>
+      </p-iftalabel>
+    </div>
+    <button pButton type="submit" label="Login" [disabled]="loginForm.invalid || (isLoading$ | async)"></button>
+    <div *ngIf="isLoading$ | async" class="loading">Logging in...</div>
+    <div *ngIf="error$ | async as error" class="error">{{ error }}</div>
+  </form>
+</div>
