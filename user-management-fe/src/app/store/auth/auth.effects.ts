@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
@@ -9,53 +9,47 @@ import { jwtDecode } from 'jwt-decode';
 
 @Injectable()
 export class AuthEffects {
-  login$;
-  loginSuccess$;
-  logout$;
+  private actions$ = inject(Actions);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private actions$: Actions,
-    private authService: AuthService,
-    private router: Router
-  ) {
-    this.login$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(AuthActions.login),
-        mergeMap(({ email, password }) =>
-          this.authService.login(email, password).pipe(
-            map((response: any) => {
-              const decodedToken = jwtDecode(response.token) as any;
-              localStorage.setItem('token', response.token);
-              return AuthActions.loginSuccess({ 
-                token: response.token, 
-                user: decodedToken 
-              });
-            }),
-            catchError((error) => of(AuthActions.loginFailure({ 
-              error: error.error?.message || 'Login failed' 
-            })))
-          )
+  login$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.login),
+      mergeMap(({ email, password }) =>
+        this.authService.login(email, password).pipe(
+          map((response: any) => {
+            const decodedToken = jwtDecode(response.token) as any;
+            localStorage.setItem('token', response.token);
+            return AuthActions.loginSuccess({ 
+              token: response.token, 
+              user: decodedToken 
+            });
+          }),
+          catchError((error) => of(AuthActions.loginFailure({ 
+            error: error.error?.message || 'Login failed' 
+          })))
         )
       )
-    );
+    )
+  );
 
-    this.loginSuccess$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(AuthActions.loginSuccess),
-        tap(() => this.router.navigate(['/users']))
-      ),
-      { dispatch: false }
-    );
+  loginSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loginSuccess),
+      tap(() => this.router.navigate(['/users']))
+    ),
+    { dispatch: false }
+  );
 
-    this.logout$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(AuthActions.logout),
-        tap(() => {
-          localStorage.removeItem('token');
-          this.router.navigate(['/login']);
-        }),
-        map(() => AuthActions.logoutSuccess())
-      )
-    );
-  }
+  logout$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.logout),
+      tap(() => {
+        localStorage.removeItem('token');
+        this.router.navigate(['/login']);
+      }),
+      map(() => AuthActions.logoutSuccess())
+    )
+  );
 } 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -13,8 +13,7 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private apiUrl = 'http://localhost:3001';
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   getUsers(): Observable<User[]> {
     const token = localStorage.getItem('token');

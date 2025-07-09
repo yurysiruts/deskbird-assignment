@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -29,16 +29,14 @@ export class EditUserDialogComponent implements OnChanges {
   @Output() save = new EventEmitter<Partial<User>>();
   @Output() cancel = new EventEmitter<void>();
 
-  editForm: FormGroup;
+  private fb = inject(FormBuilder);
+  
+  editForm: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    role: ['', Validators.required]
+  });
   originalRole: string | null = null;
-
-  constructor(private fb: FormBuilder) {
-    this.editForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: ['', Validators.required]
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['user'] && this.user) {

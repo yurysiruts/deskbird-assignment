@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -39,38 +39,28 @@ import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.com
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UsersComponent implements OnInit {
-  users$: Observable<User[]>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
-  isAdmin$: Observable<boolean>;
-  currentUser$: Observable<User | null>;
+  private store = inject(Store);
+  private fb = inject(FormBuilder);
+  private messageService = inject(MessageService);
+  
+  users$: Observable<User[]> = this.store.select(selectUsers);
+  isLoading$: Observable<boolean> = this.store.select(selectUsersLoading);
+  error$: Observable<string | null> = this.store.select(selectUsersError);
+  isAdmin$: Observable<boolean> = this.store.select(selectIsAdmin);
+  currentUser$: Observable<User | null> = this.store.select(selectUser);
   
   displayDialog = false;
   selectedUser: User | null = null;
-  editForm;
+  editForm = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    role: ['', Validators.required]
+  });
 
   roles = [
     { label: 'User', value: 'user' },
     { label: 'Admin', value: 'admin' }
   ];
-
-  constructor(
-    private store: Store,
-    private fb: FormBuilder,
-    private messageService: MessageService
-  ) {
-    this.users$ = this.store.select(selectUsers);
-    this.isLoading$ = this.store.select(selectUsersLoading);
-    this.error$ = this.store.select(selectUsersError);
-    this.isAdmin$ = this.store.select(selectIsAdmin);
-    this.currentUser$ = this.store.select(selectUser);
-    
-    this.editForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: ['', Validators.required]
-    });
-  }
 
   ngOnInit() {
     this.store.dispatch(UsersActions.loadUsers());

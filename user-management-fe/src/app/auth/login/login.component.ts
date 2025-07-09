@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
@@ -19,18 +19,15 @@ import { IftaLabelModule } from 'primeng/iftalabel';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
-  loginForm;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
-
-  constructor(private fb: FormBuilder, private store: Store) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
-    });
-    this.isLoading$ = this.store.select(selectIsLoading);
-    this.error$ = this.store.select(selectError).pipe(map(e => e ?? null));
-  }
+  private fb = inject(FormBuilder);
+  private store = inject(Store);
+  
+  loginForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required]
+  });
+  isLoading$: Observable<boolean> = this.store.select(selectIsLoading);
+  error$: Observable<string | null> = this.store.select(selectError).pipe(map(e => e ?? null));
 
   onSubmit() {
     if (this.loginForm.valid) {
