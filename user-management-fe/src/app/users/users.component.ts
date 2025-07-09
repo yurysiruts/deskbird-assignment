@@ -1,8 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, tap, take } from 'rxjs';
+import { Actions, ofType } from '@ngrx/effects';
+import { Observable, take, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -38,10 +40,12 @@ import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.com
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   private store = inject(Store);
+  private actions$ = inject(Actions);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
+  private destroy$ = new Subject<void>();
   
   users$: Observable<User[]> = this.store.select(selectUsers);
   isLoading$: Observable<boolean> = this.store.select(selectUsersLoading);
@@ -64,6 +68,7 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(UsersActions.loadUsers());
+    this.setupToastListeners();
   }
 
   editUser(user: User) {
@@ -99,5 +104,34 @@ export class UsersComponent implements OnInit {
   logout() {
     console.log('logout');
     this.store.dispatch(AuthActions.logout());
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupToastListeners() {
+    this.actions$.pipe(
+      ofType(UsersActions.updateUserSuccess),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'User information updated successfully'
+      });
+    });
+
+    this.actions$.pipe(
+      ofType(UsersActions.updateUserFailure),
+      takeUntil(this.destroy$)
+    ).subscribe(({ error }) => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error || 'Failed to update user information'
+      });
+    });
   }
 } 

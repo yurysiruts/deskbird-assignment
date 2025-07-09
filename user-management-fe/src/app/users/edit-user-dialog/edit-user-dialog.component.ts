@@ -51,6 +51,14 @@ export class EditUserDialogComponent implements OnChanges {
       this.editForm.reset();
       this.originalRole = null;
     }
+    
+    if (changes['disabled'] !== undefined) {
+      if (this.disabled) {
+        this.editForm.disable();
+      } else {
+        this.editForm.enable();
+      }
+    }
   }
 
   onSave() {
