@@ -14,6 +14,9 @@ export class UsersService {
         email: true,
         role: true,
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
   }
 
